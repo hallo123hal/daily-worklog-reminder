@@ -1,0 +1,24 @@
+{
+  "name": "jira-admin-page-custom-ui",
+  "version": "1.1.17",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^25.2.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.0"
+  },
+  "dependencies": {
+    "@atlaskit/button": "^23.9.6",
+    "@atlaskit/checkbox": "^17.3.2",
+    "@atlaskit/form": "^15.3.4",
+    "@atlaskit/select": "^21.7.4",
+    "@atlaskit/textfield": "^8.2.3",
+    "@forge/api": "^7.0.1",
+    "@forge/resolver": "1.7.1",
+    "@forge/storage": "^2.0.3",
+    "@sendgrid/mail": "^8.1.6",
+    "date-fns": "^4.1.0"
+  }
+}
