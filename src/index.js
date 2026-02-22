@@ -1,12 +1,14 @@
-import Resolver from '@forge/resolver';
+import { handler as resolverHandler } from './resolvers';
+import { dailyScanHandler } from './handlers/dailyScan';
 
-const resolver = new Resolver();
+// Export resolver handler for admin page
+export const handler = resolverHandler;
 
-resolver.define('getText', (req) => {
-    console.log(req);
+// Export daily scan handler for scheduled trigger
+export { dailyScanHandler };
 
-    return 'Hello, world!';
-});
-
-export const handler = resolver.getDefinitions();
-
+// Test function (can be called manually for testing)
+export async function testHandler() {
+  console.log('Test handler called at:', new Date().toISOString());
+  return { status: 'ok', message: 'Test successful' };
+}

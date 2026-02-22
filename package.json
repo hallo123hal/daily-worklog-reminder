@@ -20,5 +20,10 @@
     "@forge/storage": "^2.0.3",
     "@sendgrid/mail": "^8.1.6",
     "date-fns": "^4.1.0"
+  },
+  "scripts": {
+    "lint": "eslint src/**/*",
+    "build": "tsc",
+    "watch": "tsc --watch"
   }
 }
