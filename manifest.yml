@@ -6,21 +6,16 @@ modules:
         function: resolver
       title: Worklog Reminder Settings
   
-  trigger:
+  scheduledTrigger:
     - key: daily-worklog-scan
       function: dailyScan
-      schedule: cron(30 17 * * ? *)
+      interval: day
   
   function:
     - key: dailyScan
       handler: index.dailyScanHandler
-      runtime: nodejs24.x
-      memoryMB: 512
-      timeout: 300
     - key: resolver
       handler: index.handler
-      runtime: nodejs24.x
-      memoryMB: 512
 
 resources:
   - key: main
@@ -30,9 +25,7 @@ permissions:
   scopes:
     - read:jira-work
     - read:jira-user
-    - read:jira-work-management:configuration
     - storage:app
-    - external:email
 
 app:
   runtime:
