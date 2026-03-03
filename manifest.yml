@@ -26,6 +26,10 @@ permissions:
     - read:jira-work
     - read:jira-user
     - storage:app
+  external:
+    fetch:
+      backend:
+        - https://api.sendgrid.com/*
 
 app:
   runtime:

@@ -1,5 +1,6 @@
 import Resolver from '@forge/resolver';
 import { setSendGridApiKey, getSendGridApiKey, saveAppConfig, getAppConfig, getDefaultConfig } from '../services/configService';
+import { dailyScanHandler } from '../handlers/dailyScan';
 
 const resolver = new Resolver();
 
@@ -37,6 +38,22 @@ resolver.define('saveConfig', async (req) => {
 resolver.define('getConfig', async () => {
   const config = await getAppConfig();
   return config || getDefaultConfig();
+});
+
+// Manual trigger for testing - runs the daily scan immediately
+resolver.define('triggerManualScan', async () => {
+  try {
+    const result = await dailyScanHandler({});
+    return { 
+      success: true, 
+      result: result 
+    };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error.message 
+    };
+  }
 });
 
 export const handler = resolver.getDefinitions();

@@ -29,6 +29,10 @@ function App() {
     
     // Last execution info
     const [lastExecution, setLastExecution] = useState(null);
+    
+    // Manual scan state
+    const [scanning, setScanning] = useState(false);
+    const [scanResult, setScanResult] = useState(null);
 
     // Load configuration on mount
     useEffect(() => {
@@ -132,6 +136,38 @@ function App() {
             setError(`Failed to save API key: ${err.message}`);
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleManualScan = async () => {
+        try {
+            setScanning(true);
+            setError(null);
+            setSuccessMessage(null);
+            setScanResult(null);
+            
+            const result = await invoke('triggerManualScan');
+            
+            if (result.success) {
+                setScanResult(result.result);
+                const usersFound = result.result.usersFound || 0;
+                if (usersFound > 0) {
+                    setSuccessMessage(`Scan completed! Found ${usersFound} user(s) below threshold. Email sent to recipients.`);
+                } else {
+                    setSuccessMessage(`Scan completed! No users found below threshold (all users logged sufficient hours).`);
+                }
+                // Reload config to get updated last execution status
+                setTimeout(() => {
+                    loadConfiguration();
+                }, 500);
+            } else {
+                setError(`Scan failed: ${result.error || 'Unknown error'}`);
+            }
+        } catch (err) {
+            console.error('Error triggering manual scan:', err);
+            setError(`Failed to trigger scan: ${err.message}`);
+        } finally {
+            setScanning(false);
         }
     };
 
@@ -422,15 +458,23 @@ function App() {
                     type="button" 
                     className="btn-primary btn-save"
                     onClick={handleSaveConfig}
-                    disabled={saving}
+                    disabled={saving || scanning}
                 >
                     {saving ? 'Saving...' : 'Save Configuration'}
                 </button>
                 <button 
                     type="button" 
                     className="btn-secondary"
+                    onClick={handleManualScan}
+                    disabled={saving || scanning}
+                >
+                    {scanning ? 'Running Scan...' : 'Run Scan Now'}
+                </button>
+                <button 
+                    type="button" 
+                    className="btn-secondary"
                     onClick={loadConfiguration}
-                    disabled={saving}
+                    disabled={saving || scanning}
                 >
                     Reload
                 </button>

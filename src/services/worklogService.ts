@@ -1,4 +1,4 @@
-import api from '@forge/api';
+import api, { route } from '@forge/api';
 import { AppConfig } from './configService';
 import { WorklogScanResult, LowWorklogUser } from '../types';
 import { getTodayDateString, secondsToHours } from '../utils/dateUtils';
@@ -120,9 +120,9 @@ async function fetchAllActiveUsers(): Promise<Array<{accountId: string, displayN
     try {
       // Use asApp() since this is called from a scheduled trigger (no user context)
       // The User Search API endpoint: /rest/api/3/users/search
-      // Build URL with query parameters
-      const userSearchUrl = `/rest/api/3/users/search?startAt=${startAt}&maxResults=${maxResults}&active=true`;
-      const response = await api.asApp().requestJira(userSearchUrl as any, {
+      // Build URL with query parameters using route helper
+      const userSearchUrl = route`/rest/api/3/users/search?startAt=${startAt}&maxResults=${maxResults}&active=true`;
+      const response = await api.asApp().requestJira(userSearchUrl, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -199,14 +199,22 @@ async function fetchUserWorklogForToday(accountId: string): Promise<number> {
     // Search for recently updated issues and check their worklogs
     while (true) {
       try {
-        // Build URL with query parameters (JQL needs to be URL encoded)
-        const encodedJql = encodeURIComponent(jql);
-        const searchUrl = `/rest/api/3/search?jql=${encodedJql}&startAt=${startAt}&maxResults=${maxResults}&fields=key`;
-        const searchResponse = await api.asApp().requestJira(searchUrl as any, {
-          method: 'GET',
+        // Use the new /rest/api/3/search/jql endpoint (POST method)
+        // The old /rest/api/3/search GET endpoint has been deprecated
+        const searchUrl = route`/rest/api/3/search/jql`;
+        const requestBody = {
+          jql: jql,
+          startAt: startAt,
+          maxResults: maxResults,
+          fields: ['key']
+        };
+        const searchResponse = await api.asApp().requestJira(searchUrl, {
+          method: 'POST',
           headers: {
-            'Accept': 'application/json'
-          }
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
         });
         
         if (!searchResponse.ok) {
@@ -233,8 +241,9 @@ async function fetchUserWorklogForToday(accountId: string): Promise<number> {
           processedIssues.add(issueKey);
           
           try {
-            // Fetch worklogs for this issue
-            const worklogResponse = await api.asApp().requestJira(`/rest/api/3/issue/${issueKey}/worklog` as any, {
+            // Fetch worklogs for this issue using route helper
+            const worklogUrl = route`/rest/api/3/issue/${issueKey}/worklog`;
+            const worklogResponse = await api.asApp().requestJira(worklogUrl, {
               method: 'GET',
               headers: {
                 'Accept': 'application/json'
